@@ -1,5 +1,6 @@
 package com.techdrawer.stocklite.service;
 
+import com.techdrawer.stocklite.dto.ManageProductDTO;
 import com.techdrawer.stocklite.dto.ProductRegistrationDTO;
 import com.techdrawer.stocklite.dto.ProductResponseDTO;
 import com.techdrawer.stocklite.model.Product;
@@ -40,7 +41,7 @@ public class ProductService {
         Product product = new Product();
 
         product.setName(dto.getName());
-        product.setDescription(product.getDescription());
+        product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
         product.setQuantity(dto.getQuantity());
         product.setCategory(dto.getCategory());
@@ -81,6 +82,35 @@ public class ProductService {
     public void deleteProduct(Long id){
 
         productRepository.deleteById(id);
+    }
+
+
+    // Add product
+    public ProductResponseDTO addProduct(ManageProductDTO dto){
+
+        Product product = productRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        product.setQuantity(product.getQuantity() + dto.getQuantity());
+
+        Product addedProduct = productRepository.save(product);
+
+        return productMapperService.mapToResponseDTO(addedProduct);
+    }
+
+    // Remove Product
+    public ProductResponseDTO removeProduct(ManageProductDTO dto){
+        Product product = productRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        if (product.getQuantity() < dto.getQuantity()){
+            throw new RuntimeException("Quantity to remove is more than the stock");
+        }
+        product.setQuantity(product.getQuantity() - dto.getQuantity());
+
+        Product removedProduct = productRepository.save(product);
+
+        return productMapperService.mapToResponseDTO(removedProduct);
     }
 
 }
