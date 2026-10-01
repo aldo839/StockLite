@@ -1,5 +1,6 @@
 package com.techdrawer.stocklite.controller;
 
+import com.techdrawer.stocklite.dto.ManageProductDTO;
 import com.techdrawer.stocklite.dto.ProductRegistrationDTO;
 import com.techdrawer.stocklite.dto.ProductResponseDTO;
 import com.techdrawer.stocklite.service.ProductService;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/ap/products")
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -49,5 +50,20 @@ public class ProductController {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
+    @PutMapping("/add")
+    public ResponseEntity<ProductResponseDTO> addProduct(@Valid @RequestBody ManageProductDTO dto){
+
+        return new ResponseEntity<>(productService.addProduct(dto), HttpStatus.OK);
+    }
+
+    @PutMapping("/remove")
+    public ResponseEntity<ProductResponseDTO> removeProduct(@Valid @RequestBody ManageProductDTO dto){
+
+        return new ResponseEntity<>(productService.removeProduct(dto), HttpStatus.OK);
+    }
+
+
 
 }
