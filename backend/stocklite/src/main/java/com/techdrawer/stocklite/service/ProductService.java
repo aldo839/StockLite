@@ -3,6 +3,7 @@ package com.techdrawer.stocklite.service;
 import com.techdrawer.stocklite.dto.ManageProductDTO;
 import com.techdrawer.stocklite.dto.ProductRegistrationDTO;
 import com.techdrawer.stocklite.dto.ProductResponseDTO;
+import com.techdrawer.stocklite.model.ActivityType;
 import com.techdrawer.stocklite.model.Product;
 import com.techdrawer.stocklite.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,15 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductMapperService productMapperService;
+    private final ActivityService activityService;
 
     public List<ProductResponseDTO> getProducts(){
+
+        activityService.record(
+                ActivityType.GET_ALL_PRODUCT,
+                "Consultation of the product list",
+                LocalDateTime.now()
+        );
 
         return productRepository.findAll().stream()
                 .map(productMapperService::mapToResponseDTO)
@@ -26,6 +34,12 @@ public class ProductService {
     }
 
     public ProductResponseDTO getProductById(Long id){
+
+        activityService.record(
+                ActivityType.GET_ALL_PRODUCT,
+                "Consultation of a product with the ID : " + id,
+                LocalDateTime.now()
+        );
 
         return productRepository.findById(id)
                 .map(productMapperService::mapToResponseDTO)
@@ -46,6 +60,12 @@ public class ProductService {
         product.setQuantity(dto.getQuantity());
         product.setCategory(dto.getCategory());
         product.setCreationDate(LocalDateTime.now());
+
+        activityService.record(
+                ActivityType.CREATE_PRODUCT,
+                "Creation of product with the name : " + product.getName(),
+                LocalDateTime.now()
+        );
 
         Product createdProduct = productRepository.save(product);
 
@@ -76,12 +96,24 @@ public class ProductService {
 
         Product updatedProduct = productRepository.save(product);
 
+        activityService.record(
+                ActivityType.UPDATE_PRODUCT,
+                "Modification of product with the name : '" + product.getName() +"'",
+                LocalDateTime.now()
+        );
+
         return productMapperService.mapToResponseDTO(updatedProduct);
     }
 
     public void deleteProduct(Long id){
 
         productRepository.deleteById(id);
+
+        activityService.record(
+                ActivityType.DELETE_PRODUCT,
+                "Delete product with id : " + id,
+                LocalDateTime.now()
+        );
     }
 
 
@@ -95,6 +127,12 @@ public class ProductService {
         product.setModificationDate(LocalDateTime.now());
 
         Product addedProduct = productRepository.save(product);
+
+        activityService.record(
+                ActivityType.ADD_PRODUCT,
+                "Adding of " + dto.getQuantity() + " " + product.getName(),
+                LocalDateTime.now()
+        );
 
         return productMapperService.mapToResponseDTO(addedProduct);
     }
@@ -111,6 +149,12 @@ public class ProductService {
         product.setModificationDate(LocalDateTime.now());
 
         Product removedProduct = productRepository.save(product);
+
+        activityService.record(
+                ActivityType.REMOVE_PRODUCT,
+                "Removing of " + dto.getQuantity() + " '" + product.getName() +"'",
+                LocalDateTime.now()
+        );
 
         return productMapperService.mapToResponseDTO(removedProduct);
     }
