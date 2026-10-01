@@ -92,6 +92,7 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         product.setQuantity(product.getQuantity() + dto.getQuantity());
+        product.setModificationDate(LocalDateTime.now());
 
         Product addedProduct = productRepository.save(product);
 
@@ -107,6 +108,7 @@ public class ProductService {
             throw new RuntimeException("Quantity to remove is more than the stock");
         }
         product.setQuantity(product.getQuantity() - dto.getQuantity());
+        product.setModificationDate(LocalDateTime.now());
 
         Product removedProduct = productRepository.save(product);
 
