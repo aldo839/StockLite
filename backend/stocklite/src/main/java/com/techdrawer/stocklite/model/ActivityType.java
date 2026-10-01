@@ -1,0 +1,19 @@
+package com.techdrawer.stocklite.model;
+
+public enum ActivityType {
+
+    GET_ALL_CATEGORY,
+    GET_CATEGORY_BY_ID,
+    CREATE_CATEGORY,
+    UPDATE_CATEGORY,
+    DELETE_CATEGORY,
+
+    GET_ALL_PRODUCT,
+    GET_PRODUCT_BY_ID,
+    CREATE_PRODUCT,
+    UPDATE_PRODUCT,
+    DELETE_PRODUCT,
+    ADD_PRODUCT,
+    REMOVE_PRODUCT
+
+}
