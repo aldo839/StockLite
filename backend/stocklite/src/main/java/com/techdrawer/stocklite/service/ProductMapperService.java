@@ -16,6 +16,7 @@ public class ProductMapperService {
                 product.getDescription(),
                 product.getPrice(),
                 product.getQuantity(),
+                product.getStatus(),
                 product.getCategory(),
                 product.getCreationDate(),
                 product.getModificationDate()
