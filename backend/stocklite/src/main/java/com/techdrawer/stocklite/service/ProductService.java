@@ -5,6 +5,7 @@ import com.techdrawer.stocklite.dto.ProductRegistrationDTO;
 import com.techdrawer.stocklite.dto.ProductResponseDTO;
 import com.techdrawer.stocklite.model.ActivityType;
 import com.techdrawer.stocklite.model.Product;
+import com.techdrawer.stocklite.model.ProductStatus;
 import com.techdrawer.stocklite.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,17 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapperService productMapperService;
     private final ActivityService activityService;
+
+    private ProductStatus calculateStatus(Integer quantity){
+
+        if (quantity == null || quantity <= 0){
+            return ProductStatus.OUT_OF_STOCK;
+        }
+        if (quantity < 6) {
+            return ProductStatus.LOW_STOCK;
+        }
+        return ProductStatus.IN_STOCK;
+    }
 
     public List<ProductResponseDTO> getProducts(){
 
@@ -59,15 +71,16 @@ public class ProductService {
         product.setPrice(dto.getPrice());
         product.setQuantity(dto.getQuantity());
         product.setCategory(dto.getCategory());
+        product.setStatus(calculateStatus(product.getQuantity()));
         product.setCreationDate(LocalDateTime.now());
+
+        Product createdProduct = productRepository.save(product);
 
         activityService.record(
                 ActivityType.CREATE_PRODUCT,
                 "Creation of product with the name : " + product.getName(),
                 LocalDateTime.now()
         );
-
-        Product createdProduct = productRepository.save(product);
 
         return productMapperService.mapToResponseDTO(createdProduct);
     }
@@ -92,6 +105,7 @@ public class ProductService {
         if (dto.getCategory() != null ){
             product.setCategory(dto.getCategory());
         }
+        product.setStatus(calculateStatus(product.getQuantity()));
         product.setModificationDate(LocalDateTime.now());
 
         Product updatedProduct = productRepository.save(product);
@@ -124,6 +138,7 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         product.setQuantity(product.getQuantity() + dto.getQuantity());
+        product.setStatus(calculateStatus(product.getQuantity()));
         product.setModificationDate(LocalDateTime.now());
 
         Product addedProduct = productRepository.save(product);
@@ -146,6 +161,7 @@ public class ProductService {
             throw new RuntimeException("Quantity to remove is more than the stock");
         }
         product.setQuantity(product.getQuantity() - dto.getQuantity());
+        product.setStatus(calculateStatus(product.getQuantity()));
         product.setModificationDate(LocalDateTime.now());
 
         Product removedProduct = productRepository.save(product);
