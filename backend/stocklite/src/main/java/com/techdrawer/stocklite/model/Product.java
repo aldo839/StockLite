@@ -22,6 +22,8 @@ public class Product {
 
     private Integer quantity;
 
+    private ProductStatus status;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
