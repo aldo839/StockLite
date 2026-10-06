@@ -1,6 +1,5 @@
 package com.techdrawer.stocklite.dto;
 
-import com.techdrawer.stocklite.model.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -22,7 +21,7 @@ public class ProductRegistrationDTO {
     @NotNull(message = "Quantity is require")
     private Integer quantity;
 
-    @NotNull(message = "Category is require")
-    private Category category;
+    @NotNull(message = "Category ID is require")
+    private Long categoryId;
 
 }
