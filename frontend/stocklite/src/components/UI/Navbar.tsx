@@ -1,59 +1,123 @@
 import { NavLink } from "react-router-dom";
 import Logo from "./Logo";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHouseChimney, faGift, faArrowRightToBracket, faArrowRightFromBracket, faClockRotateLeft, faCartArrowDown } from "@fortawesome/free-solid-svg-icons";
+
 function Navbar () {
 
     return (
-        <div className="pt-[2%] bg-blue-950 text-white h-full">
+
+        <aside className="w-70 shrink-0 min-h-screen bg-blue-950 text-white p-6">
+
             <Logo 
-                logoStyle={"flex gap-2 mb-[1%]"} 
-                imgSize={25} 
-                textStyle={"text-2xl text-white font-semibold"} 
+                logoStyle={"flex items-center justify-center gap-3 mb-8"} 
+                imgSize={40} 
+                textStyle={"text-3xl text-white font-semibold"} 
                 secondTextColor={"text-indigo-500"} 
             />
 
-            <div>
-                <ul>
-                    <li className="mb-3">
-                        <NavLink to={"/dashboard"} 
-                            className={({isActive}) => isActive ? "bg-indigo-500 py-1 rounded-sm" : ""}
+            <nav className="text-xl">
+                <ul className="space-y-2">
+                    <li>
+                        <NavLink
+                            to="/dashboard"
+                            className={({ isActive }) =>
+                                `flex gap-2 items-center px-4 py-2 rounded-sm ${
+                                    isActive
+                                        ? "bg-indigo-500"
+                                        : "hover:bg-blue-900"
+                                }`
+                            }
                         >
-                            Table de bord
+                            <FontAwesomeIcon icon={faHouseChimney} />
+                            Tableau de bord
                         </NavLink>
                     </li>
-                    <li className="mb-3">
-                        <NavLink 
-                            to={"/products"}
-                            className={({isActive}) => isActive ? "bg-indigo-500 py-1 rounded-sm" : ""}
+
+                    <li>
+                        <NavLink
+                            to="/products"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2 px-4 py-2 rounded-sm ${
+                                    isActive
+                                        ? "bg-indigo-500"
+                                        : "hover:bg-blue-900"
+                                }`
+                            }
                         >
+                            <FontAwesomeIcon icon={faGift} />
                             Produits
                         </NavLink>
                     </li>
-                    <li className="mb-3">
-                        <NavLink to={"/add"}
-                            className={({isActive}) => isActive ? "bg-indigo-500 py-1 rounded-sm" : ""}
+
+                    <li>
+                        <NavLink
+                            to="/add-product"
+                            className={({ isActive }) =>
+                                `flex gap-2 items-center px-4 py-2 rounded-sm ${
+                                    isActive
+                                        ? "bg-indigo-500"
+                                        : "hover:bg-blue-900"
+                                }`
+                            }
                         >
+                            <FontAwesomeIcon icon={faArrowRightToBracket} />
                             Entrées
                         </NavLink>
                     </li>
-                    <li className="mb-3">
-                        <NavLink to={"/remove"}
-                            className={({isActive}) => isActive ? "bg-indigo-500 py-1 rounded-sm" : ""}
+
+                    <li>
+                        <NavLink
+                            to="/remove-product"
+                            className={({ isActive }) =>
+                                `flex gap-2 items-center px-4 py-2 rounded-sm ${
+                                    isActive
+                                        ? "bg-indigo-500"
+                                        : "hover:bg-blue-900"
+                                }`
+                            }
                         >
+                            <FontAwesomeIcon icon={faArrowRightFromBracket} />
                             Sorties
                         </NavLink>
                     </li>
-                    <li className="mb-3">
-                        <NavLink to={"/activities"}
-                            className={({isActive}) => isActive ? "bg-indigo-500 py-1 rounded-sm" : ""}
+
+                    <li>
+                        <NavLink
+                            to="/added"
+                            className={({ isActive }) =>
+                                `flex gap-2 items-center px-4 py-2 rounded-sm ${
+                                    isActive
+                                        ? "bg-indigo-500"
+                                        : "hover:bg-blue-900"
+                                }`
+                            }
                         >
+                            <FontAwesomeIcon icon={faCartArrowDown} />
+                            Boutique
+                        </NavLink>
+                    </li>
+
+                    <li>
+                        <NavLink
+                            to="/history"
+                            className={({ isActive }) =>
+                                `flex gap-2 items-center px-4 py-2 rounded-sm ${
+                                    isActive
+                                        ? "bg-indigo-500"
+                                        : "hover:bg-blue-900"
+                                }`
+                            }
+                        >
+                            <FontAwesomeIcon icon={faClockRotateLeft} />
                             Historiques
                         </NavLink>
                     </li>
                 </ul>
-            </div>
-        </div>
-    )
+            </nav>
 
+        </aside>
+    )
 }
 export default Navbar
