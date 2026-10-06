@@ -1,8 +1,6 @@
 package com.techdrawer.stocklite.controller;
 
-import com.techdrawer.stocklite.dto.ManageProductDTO;
-import com.techdrawer.stocklite.dto.ProductRegistrationDTO;
-import com.techdrawer.stocklite.dto.ProductResponseDTO;
+import com.techdrawer.stocklite.dto.*;
 import com.techdrawer.stocklite.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +37,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponseDTO> updateProduct(@Valid @PathVariable Long id, @RequestBody ProductRegistrationDTO dto){
+    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductUpdateDTO dto){
 
         return new ResponseEntity<>(productService.updateProduct(id, dto), HttpStatus.OK);
     }
@@ -52,19 +50,18 @@ public class ProductController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-
-    @PutMapping("/add")
-    public ResponseEntity<ProductResponseDTO> addProduct(@Valid @RequestBody ManageProductDTO dto){
+    // Add an existing product to the stock (Up quantity)
+    @PostMapping("/add")
+    public ResponseEntity<ProductResponseDTO> addProduct(@Valid @RequestBody AddProductDTO dto){
 
         return new ResponseEntity<>(productService.addProduct(dto), HttpStatus.OK);
     }
 
-    @PutMapping("/remove")
-    public ResponseEntity<ProductResponseDTO> removeProduct(@Valid @RequestBody ManageProductDTO dto){
+    // Remove an existing product from stock (down quantity)
+    @PostMapping("/remove")
+    public ResponseEntity<ProductResponseDTO> removeProduct(@Valid @RequestBody RemoveProductDTO dto){
 
         return new ResponseEntity<>(productService.removeProduct(dto), HttpStatus.OK);
     }
-
-
 
 }
