@@ -1,11 +1,11 @@
 package com.techdrawer.stocklite.service;
 
-import com.techdrawer.stocklite.dto.ManageProductDTO;
-import com.techdrawer.stocklite.dto.ProductRegistrationDTO;
-import com.techdrawer.stocklite.dto.ProductResponseDTO;
+import com.techdrawer.stocklite.dto.*;
 import com.techdrawer.stocklite.model.ActivityType;
+import com.techdrawer.stocklite.model.Category;
 import com.techdrawer.stocklite.model.Product;
 import com.techdrawer.stocklite.model.ProductStatus;
+import com.techdrawer.stocklite.repository.CategoryRepository;
 import com.techdrawer.stocklite.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapperService productMapperService;
     private final ActivityService activityService;
+    private final CategoryRepository categoryRepository;
 
     private ProductStatus calculateStatus(Integer quantity){
 
@@ -49,7 +50,7 @@ public class ProductService {
 
         activityService.record(
                 ActivityType.GET_ALL_PRODUCT,
-                "Consultation of a product with the ID : " + id,
+                "Product ID : " + id,
                 LocalDateTime.now()
         );
 
@@ -64,13 +65,16 @@ public class ProductService {
             throw new RuntimeException("Product already exist with this name");
         }
 
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
         Product product = new Product();
 
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
         product.setQuantity(dto.getQuantity());
-        product.setCategory(dto.getCategory());
+        product.setCategory(category);
         product.setStatus(calculateStatus(product.getQuantity()));
         product.setCreationDate(LocalDateTime.now());
 
@@ -85,7 +89,7 @@ public class ProductService {
         return productMapperService.mapToResponseDTO(createdProduct);
     }
 
-    public ProductResponseDTO updateProduct(Long id, ProductRegistrationDTO dto){
+    public ProductResponseDTO updateProduct(Long id, ProductUpdateDTO dto){
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -102,9 +106,6 @@ public class ProductService {
         if (dto.getQuantity() != null ){
             product.setQuantity(dto.getQuantity());
         }
-        if (dto.getCategory() != null ){
-            product.setCategory(dto.getCategory());
-        }
         product.setStatus(calculateStatus(product.getQuantity()));
         product.setModificationDate(LocalDateTime.now());
 
@@ -112,7 +113,7 @@ public class ProductService {
 
         activityService.record(
                 ActivityType.UPDATE_PRODUCT,
-                "Modification of product with the name : '" + product.getName() +"'",
+                "Product name" + product.getName() +"'",
                 LocalDateTime.now()
         );
 
@@ -125,16 +126,16 @@ public class ProductService {
 
         activityService.record(
                 ActivityType.DELETE_PRODUCT,
-                "Delete product with id : " + id,
+                "Product ID : " + id,
                 LocalDateTime.now()
         );
     }
 
 
     // Add product
-    public ProductResponseDTO addProduct(ManageProductDTO dto){
+    public ProductResponseDTO addProduct(AddProductDTO dto){
 
-        Product product = productRepository.findById(dto.getId())
+        Product product = productRepository.findById(dto.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         product.setQuantity(product.getQuantity() + dto.getQuantity());
@@ -145,7 +146,8 @@ public class ProductService {
 
         activityService.record(
                 ActivityType.ADD_PRODUCT,
-                "Adding of " + dto.getQuantity() + " " + product.getName(),
+                "Product name : " + product.getName() + "\n Quantity : " + dto.getQuantity() +
+                        "\nSupplier : " + dto.getSupplier() + "\n Notes : " + dto.getNotes(),
                 LocalDateTime.now()
         );
 
@@ -153,8 +155,8 @@ public class ProductService {
     }
 
     // Remove Product
-    public ProductResponseDTO removeProduct(ManageProductDTO dto){
-        Product product = productRepository.findById(dto.getId())
+    public ProductResponseDTO removeProduct(RemoveProductDTO dto){
+        Product product = productRepository.findById(dto.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         if (product.getQuantity() < dto.getQuantity()){
@@ -168,7 +170,8 @@ public class ProductService {
 
         activityService.record(
                 ActivityType.REMOVE_PRODUCT,
-                "Removing of " + dto.getQuantity() + " '" + product.getName() +"'",
+                "Product name : "+ product.getName() + "\nQuantity : " + dto.getQuantity() +
+                        "\nNotes : " + dto.getNotes(),
                 LocalDateTime.now()
         );
 
