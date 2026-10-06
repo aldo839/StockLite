@@ -150,11 +150,15 @@ function ProductList () {
                 ) : (
 
                     <div>
+                        
                         {errMsg ? (
+
                             <div className="min-h-[50vh] flex items-center justify-center text-2xl font-medium">
                                 <span>{errMsg}</span>
                             </div>
+
                         ) : (
+
                             <div className="flex flex-col h-[75vh] justify-between bg-white pb-[1%] border-4 border-gray-100">
 
                                 <table className="w-full table-fixed border-collapse mb-[2%]">
@@ -172,39 +176,42 @@ function ProductList () {
                                     </thead>
 
                                     <tbody>
-                                    {productToDisplay.map((product, index) => (
-                                        <tr key={product.id} className="border-y-3 border-gray-100">
-                                            <th className="w-[5%] px-4 py-3 text-left">{firstElementIndex + index + 1}</th>
-                                            <td className="w-[15%] px-4 py-3 text-left">{product.name}</td>
-                                            <td className="w-[15%] px-4 py-3 text-left">{product.category.name}</td>
-                                            <td className="w-[10%] px-4 py-3 text-left">{product.price}</td>
-                                            <td className="w-[5%] px-4 py-3 text-left">{product.quantity}</td>
-                                            <td className="w-[25%] px-4 py-3 text-left">{product.description ?? "Aucune description"}</td>
-                                            <td className="w-[15%] px-4 py-3 text-left">
-                                                <span className={`px-3 py-1 rounded-full font-medium
-                                                    ${product.status === "IN_STOCK" ? 'text-green-700' : ''}
-                                                    ${product.status === "LOW_STOCK" ? 'text-orange-500' : ''}
-                                                    ${product.status === "OUT_OF_STOCK" ? 'text-red-700' : ''}
-                                                    `}>
-                                                    {getStatusLabel(product.status as Status)}
-                                                </span>
-                                            </td>
-                                            <td className="w-[10%] px-4 py-3 text-left">
-                                                <div className="flex items-center gap-6 justify-start">
-                                                    <FontAwesomeIcon icon={faPen} 
-                                                        className="text-indigo-600 text-xl p-1 rounded-lg border-2 border-gray-100 hover:cursor-pointer hover:bg-indigo-300 hover:text-white"
-                                                    />
-                                                    <FontAwesomeIcon icon={faTrashCan} 
-                                                        className="text-red-500 text-xl p-1 rounded-lg border-2 border-gray-200 hover:cursor-pointer hover:bg-red-300 hover:text-white"
-                                                    />
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+
+                                        {productToDisplay.map((product, index) => (
+                                            <tr key={product.id} className="border-y-3 border-gray-100">
+                                                <th className="w-[5%] px-4 py-3 text-left">{firstElementIndex + index + 1}</th>
+                                                <td className="w-[15%] px-4 py-3 text-left">{product.name}</td>
+                                                <td className="w-[15%] px-4 py-3 text-left">{product.category.name}</td>
+                                                <td className="w-[10%] px-4 py-3 text-left">{product.price}</td>
+                                                <td className="w-[5%] px-4 py-3 text-left">{product.quantity}</td>
+                                                <td className="w-[25%] px-4 py-3 text-left">{product.description ?? "Aucune description"}</td>
+                                                <td className="w-[15%] px-4 py-3 text-left">
+                                                    <span className={`px-3 py-1 rounded-full font-medium
+                                                        ${product.status === "IN_STOCK" ? 'text-green-700' : ''}
+                                                        ${product.status === "LOW_STOCK" ? 'text-orange-500' : ''}
+                                                        ${product.status === "OUT_OF_STOCK" ? 'text-red-700' : ''}
+                                                        `}>
+                                                        {getStatusLabel(product.status as Status)}
+                                                    </span>
+                                                </td>
+                                                <td className="w-[10%] px-4 py-3 text-left">
+                                                    <div className="flex items-center gap-6 justify-start">
+                                                        <FontAwesomeIcon icon={faPen} 
+                                                            className="text-indigo-600 text-xl p-1 rounded-lg border-2 border-gray-100 hover:cursor-pointer hover:bg-indigo-300 hover:text-white"
+                                                        />
+                                                        <FontAwesomeIcon icon={faTrashCan} 
+                                                            className="text-red-500 text-xl p-1 rounded-lg border-2 border-gray-200 hover:cursor-pointer hover:bg-red-300 hover:text-white"
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
                                     </tbody>
+
                                 </table>
                                 
                                 <div className="flex items-center justify-between px-[2%]">
+
                                     <div>
                                         <span className="text-gray-500 font-medium">Affichage de {firstElementIndex + 1}
                                             {" "}à{" "}
@@ -236,15 +243,20 @@ function ProductList () {
                                             <FontAwesomeIcon icon={faAngleRight} />
                                         </button>
                                     </div>
+
                                 </div>
+
                             </div>
                         )}
-                    </div>
 
+                    </div>
                     
                 )}
+
             </main>
+
         </div>
+        
     )
 
 }
