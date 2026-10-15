@@ -86,7 +86,13 @@ spring.datasource.password=your_postgres_password
 
 ### Application running
 ```bash
+cd /backend/stocklite
 ./mvnw spring-boot:run
+```
+
+```bash
+cd /frontend/stocklite
+npm run dev
 ```
 
 ## Demo
