@@ -31,8 +31,6 @@ know about our stock and our customer. This is a direct relationship with the st
 This is why we propose StockLite, the application that will take in consideration all that three 
 feature that is very helpful for any store in-depending of what they sell.
 
-## Demo
-
 ## Features
 
 ### Stock Management
@@ -90,6 +88,9 @@ spring.datasource.password=your_postgres_password
 ```bash
 ./mvnw spring-boot:run
 ```
+
+## Demo
+
 <img width="1920" height="906" alt="Screenshot_20261010_062836" src="https://github.com/user-attachments/assets/389c34f5-0b20-4254-a3a1-00502f8fbeee" />
 <img width="1920" height="910" alt="Screenshot_20261010_062757" src="https://github.com/user-attachments/assets/c20fd6a9-9b20-41e2-a3f9-45d1fcf41f71" />
 <img width="1920" height="910" alt="Screenshot_20261010_063043" src="https://github.com/user-attachments/assets/572dd6c2-7109-4908-9bb8-d91efa804769" />
