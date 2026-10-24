@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import Navbar from "../UI/Navbar";
-import api from "../../api/axios";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import Button from "../UI/Button";
+import { Loader2 } from "lucide-react";
+import Success from "../UI/Success";
 
 const NAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_+\-\s]{4,49}$/;
 const DESCRIOTPION_REGEX = /^[a-zA-Z0-9][!@#$%^&.,;:'"*+_-\s]{0,200}$/;
@@ -26,6 +31,7 @@ function RegisterProduct () {
 
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const [name, setName] = useState('');
     const validName = NAME_REGEX.test(name);
@@ -44,6 +50,9 @@ function RegisterProduct () {
     const [price, setPrice] = useState("");
     const validPrice = PRICE_REGEX.test(price);
     const [priceFocus, setPriceFocus] = useState(false);
+
+    const [categories, setCategories] = useState<Category[]>([]);
+
 
     useEffect(() => {
         nameRef.current?.focus();
@@ -65,14 +74,16 @@ function RegisterProduct () {
         categoryRef.current?.focus();
     }, []);
 
-    const [categories, setCategories] = useState<Category[]>([]);
+
+    const axiosPrivate = useAxiosPrivate();
 
     useEffect(() => {
 
         const fetchCategory = async () => {
 
+
             try {
-                const response = await api.get('/categories/');
+                const response = await axiosPrivate.get('/categories/');
                 
                 setCategories(response.data);
 
@@ -82,13 +93,16 @@ function RegisterProduct () {
                         setErrMsg('Bad Request')
                     }
                     else if (error.response?.status === 401){
-                        setErrMsg('Unauthorized')
+                        setErrMsg('Unauthorized');
+                        navigate('/401');
                     }
                     else if (error.response?.status === 403){
-                        setErrMsg('Forbidden')
+                        setErrMsg('Forbidden');
+                        navigate('/401');
                     }
                     else if (error.response?.status === 404){
                         setErrMsg('Categories Not Found')
+                        navigate('/404');
                     }
                     else if (error.response?.status === 500){
                         setErrMsg('Internal Server Error')
@@ -100,12 +114,12 @@ function RegisterProduct () {
         }
 
         fetchCategory();
-    }, [])
+
+    }, [axiosPrivate, navigate])
 
 
     const handleCancel = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-
         navigate('/products');
     }
 
@@ -113,6 +127,17 @@ function RegisterProduct () {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         
         e.preventDefault();
+
+        if (!validName || !validPrice || !validQuantity || !validDescription) {
+            setErrMsg("Please fix the invalid field.");
+        }
+
+        setLoading(true);
+        setErrMsg("");
+
+        setTimeout(() => {
+                navigate('/products');
+            }, 1500);
 
         const payload = {
             name,
@@ -123,7 +148,7 @@ function RegisterProduct () {
         };
 
         try {
-            const response = await api.post(
+            const response = await axiosPrivate.post(
                 '/products/',
                 JSON.stringify(payload),
                 {
@@ -138,19 +163,24 @@ function RegisterProduct () {
 
             if (axios.isAxiosError(error)) {
                 if (error.response?.status === 400){
-                    setErrMsg('Bad request')
+                    setErrMsg('Bad request');
+                    navigate('/400');
                 } 
                 else if (error.response?.status === 401){
-                    setErrMsg('Unauthorized')
+                    setErrMsg('Unauthorized');
+                    navigate('/401');
                 }
                 else if (error.response?.status === 403){
                     setErrMsg('Forbidden')
+                    navigate('/401');
                 }
                 else if (error.response?.status === 404){
                     setErrMsg('Categories Not Found')
+                    navigate('/404');
                 }
                 else if (error.response?.status === 500){
-                    setErrMsg('Internal Server Error')
+                    setErrMsg('Internal Server Error');
+                    navigate('/500');
                 }
 
             } else {
@@ -169,29 +199,36 @@ function RegisterProduct () {
             <Navbar />
 
             <main className="flex-1 pt-[2%] px-[5%]">
-                <div className="pb-[5%]">
-                    <h2 className="text-4xl text-blue-950 font-bold">Nouveau produit</h2>
-                    <p className="text-xl font-medium pt-2">Ajouter un nouveau produit à votre stock</p>
-                </div>
-
+                
+                 <Button
+                    icon={<FontAwesomeIcon icon={faPlus} />}
+                    content="Nouvelle catégorie"
+                    link="/register-category"
+                    style="text-white bg-indigo-700 rounded-sm px-5 py-2 hover:bg-indigo-500 w-[18%] ml-auto mb-[3%] transition"
+                />
+                
                 <div>
 
                     {success ? (
-                        <div>
-                            <h1>Success</h1>
-                            <p>Now let's go</p>
-                        </div>
+
+                        <Success action={"Produit enrégistré"} />
+
                     ) : (
                         
                         <div>
                             
-                            {errMsg ? (<span>{errMsg}</span>) : (
+                            {errMsg && (
+                                <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl font-medium">
+                                    {errMsg}
+                                </div>
+                            )}
 
                             <form onSubmit={handleSubmit} className="flex justify-between">
 
                                 <div className="flex flex-col gap-[3vh] w-[45%]">
+
                                     <div className="flex flex-col min-w-[30%]">
-                                        <label htmlFor="name" className="text-xl font-medium">Nom du produit</label>
+                                        <label htmlFor="name" className="text-xl font-medium">Nom du produit <span className="text-red-500">*</span></label>
                                         <input type="text"
                                             id="name"
                                             name="name"
@@ -205,7 +242,7 @@ function RegisterProduct () {
                                             onChange={(e) => setName(e.target.value)}
                                             onFocus={() => setNameFocus(true)}
                                             onBlur={() => setNameFocus(false)}
-                                            className="text-xl border rounded-sm px-5 py-3 my-2"
+                                            className="text-xl border-2 border-gray-300 rounded-lg px-5 py-3 my-2"
                                         />
                                         <span className={nameFocus && name && !validName ? 'block' : 'hidden'}>
                                             Le nom du produit est invalide <br/>
@@ -214,7 +251,7 @@ function RegisterProduct () {
                                     </div>
 
                                     <div className="flex flex-col min-w-[30%]">
-                                        <label htmlFor="price" className="text-xl font-medium">Prix de vente (FCFA)</label>
+                                        <label htmlFor="price" className="text-xl font-medium">Prix de vente (FCFA) <span className="text-red-500">*</span></label>
                                         <input type="number"
                                             id="price"
                                             name="price"
@@ -228,7 +265,7 @@ function RegisterProduct () {
                                             onChange={(e) => setPrice(e.target.value)}
                                             onFocus={() => setPriceFocus(true)}
                                             onBlur={() => setPriceFocus(false)}
-                                            className="text-xl border rounded-sm px-5 py-3 my-2"
+                                            className="text-xl border-2 border-gray-300 rounded-lg px-5 py-3 my-2"
                                         />
                                         <span className={priceFocus && price && !validPrice ? 'block' : 'hidden'}>
                                             La description du produit est invalide <br/>
@@ -237,13 +274,13 @@ function RegisterProduct () {
                                     </div>
 
                                     <div className="flex flex-col min-w-[30%]">
-                                        <label htmlFor="category" className="text-xl font-medium">Catégorie</label>
+                                        <label htmlFor="category" className="text-xl font-medium">Catégorie <span className="text-red-500">*</span></label>
                                         <select 
                                             name="category" 
                                             id="category"
                                             ref={categoryRef}
                                             value={category}
-                                            className="text-xl border rounded-sm px-5 py-3 my-2"
+                                            className="text-xl border-2 border-gray-300 rounded-lg px-5 py-3 my-2"
                                             onChange={(e) => setCategory(e.target.value)}
                                         >
                                             <option value="">Choisissez la catégorie</option>
@@ -256,7 +293,7 @@ function RegisterProduct () {
 
                                 <div className="flex flex-col gap-[3vh] w-[45%]">
                                     <div className="flex flex-col min-w-[30%]">
-                                        <label htmlFor="quantity" className="text-xl font-medium">Quantité</label>
+                                        <label htmlFor="quantity" className="text-xl font-medium">Quantité <span className="text-red-500">*</span></label>
                                         <input type="number"
                                             id="quantity"
                                             name="quantity"
@@ -270,7 +307,7 @@ function RegisterProduct () {
                                             onChange={(e) => setQuantity(e.target.value)}
                                             onFocus={() => setQuantityFocus(true)}
                                             onBlur={() => setQuantityFocus(false)}
-                                            className="text-xl border rounded-sm px-5 py-3 my-2"
+                                            className="text-xl border-2 border-gray-300 rounded-lg px-5 py-3 my-2"
                                         />
                                         <span className={quantityFocus && price && !validPrice ? 'block' : 'hidden'}>
                                             La description du produit est invalide <br/>
@@ -292,7 +329,7 @@ function RegisterProduct () {
                                             onChange={(e) => setDescription(e.target.value)}
                                             onFocus={() => setDescriptionFocus(true)}
                                             onBlur={() => setDescriptionFocus(false)}
-                                            className="text-xl border rounded-sm px-3 py-3 my-2 min-h-[20vh]"
+                                            className="text-xl border-2 border-gray-300 rounded-lg px-3 py-3 my-2 min-h-[20vh]"
                                         />
                                         <span className={descriptionFocus && description && !validDescription ? 'block' : 'hidden'}>
                                             La description du produit est invalide <br/>
@@ -305,22 +342,22 @@ function RegisterProduct () {
                                         <button 
                                             type="button"
                                             onClick={handleCancel}
-                                            className="w-[40vh] py-3 text-xl border rounded-lg bg-indigo-50 hover:cursor-pointer font-semibold"
+                                            className="w-[40vh] py-3 text-xl border border-gray-300 rounded-lg bg-indigo-50 hover:cursor-pointer hover:bg-indigo-100 font-semibold transition"
                                         >
                                             Annuler
                                         </button>
                                         <button
                                             type="submit" 
                                             disabled={!validName || !validDescription || !validPrice || !validQuantity}
-                                            className="w-[40vh] py-3 text-xl border rounded-lg bg-indigo-500 hover:cursor-pointer text-white font-semibold"
+                                            className="w-[40vh] py-3 text-xl border rounded-lg bg-indigo-500 hover:cursor-pointer text-white font-semibold transition"
                                         >
-                                            Enrégistrer
+                                            {loading && <Loader2 className="w-6 h-6 animate-spin" />}
+                                            {loading ? 'Enregistrement...' : 'Enrégistrer'}
                                         </button>
                                     </div>
                                 </div>
 
                             </form>
-                        )}
 
                         </div>
                     )}

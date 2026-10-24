@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import Navbar from "../UI/Navbar";
-import api from "../../api/axios";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
+import { Loader2 } from "lucide-react";
+import Success from "../UI/Success";
+
 
 const NOTES_REGEX = /^[a-zA-Z0-9][!@#$%^&.,;:'"*+_-\s]{0,200}$/;
 const QUANTITY_REGEX = /^\d+$/;
@@ -31,6 +34,7 @@ function RemoveProduct () {
 
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const [productId, setProductId] = useState('');
 
@@ -52,12 +56,15 @@ function RemoveProduct () {
 
     const [products, setProducts] = useState<Product[]>([]);
 
+    
+    const axiosPrivate = useAxiosPrivate();
+
     useEffect(() => {
 
         const fetchProducts = async () => {
 
             try {
-                const response = await api.get('/products/');
+                const response = await axiosPrivate.get('/products/');
                 
                 setProducts(response.data);
 
@@ -67,13 +74,16 @@ function RemoveProduct () {
                         setErrMsg('Bad Request')
                     }
                     else if (error.response?.status === 401){
-                        setErrMsg('Unauthorized')
+                        setErrMsg('Unauthorized');
+                        navigate('/401');
                     }
                     else if (error.response?.status === 403){
-                        setErrMsg('Forbidden')
+                        setErrMsg('Forbidden');
+                        navigate('/401');
                     }
                     else if (error.response?.status === 404){
                         setErrMsg('Categories Not Found')
+                        navigate('/404');
                     }
                     else if (error.response?.status === 500){
                         setErrMsg('Internal Server Error')
@@ -85,12 +95,12 @@ function RemoveProduct () {
         }
 
         fetchProducts();
-    }, [])
+        
+    }, [axiosPrivate, navigate])
 
 
     const handleCancel = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-
         navigate('/products');
     }
 
@@ -99,6 +109,9 @@ function RemoveProduct () {
         
         e.preventDefault();
 
+        setLoading(true);
+        setErrMsg("")
+
         const payload = {
             productId : Number(productId),
             quantity: Number(quantity),
@@ -106,7 +119,7 @@ function RemoveProduct () {
         };
 
         try {
-            const response = await api.post(
+            const response = await axiosPrivate.post(
                 '/products/remove',
                 JSON.stringify(payload),
                 {
@@ -121,19 +134,24 @@ function RemoveProduct () {
 
             if (axios.isAxiosError(error)) {
                 if (error.response?.status === 400){
-                    setErrMsg('Bad request')
+                    setErrMsg('Bad request');
+                    navigate('/400');
                 } 
                 else if (error.response?.status === 401){
-                    setErrMsg('Unauthorized')
+                    setErrMsg('Unauthorized');
+                    navigate('/401');
                 }
                 else if (error.response?.status === 403){
-                    setErrMsg('Forbidden')
+                    setErrMsg('Forbidden');
+                    navigate('/401');
                 }
                 else if (error.response?.status === 404){
-                    setErrMsg('Categories Not Found')
+                    setErrMsg('Categories Not Found');
+                    navigate('/404');
                 }
                 else if (error.response?.status === 500){
-                    setErrMsg('Internal Server Error')
+                    setErrMsg('Internal Server Error');
+                    navigate('/500');
                 }
 
             } else {
@@ -154,16 +172,15 @@ function RemoveProduct () {
             <main className="flex-1 pt-[2%] px-[5%]">
                 <div className="pb-[7%]">
                     <h2 className="text-4xl text-blue-950 font-bold">Sortie de stock</h2>
-                    <p className="text-xl font-medium pt-2">Sorter un produit existant à votre stock</p>
+                    <p className="text-xl font-medium pt-2">Validez la sortie d'un produit existant de votre stock</p>
                 </div>
 
                 <div>
 
                     {success ? (
-                        <div>
-                            <h1>Success</h1>
-                            <p>Now let's go</p>
-                        </div>
+                        
+                        <Success action={"Produit retiré"} />
+
                     ) : (
                         
                         <div>
@@ -235,7 +252,7 @@ function RemoveProduct () {
                                             className="text-xl border-2 border-gray-200 rounded-lg px-3 py-3 my-2 min-h-[20vh]"
                                         />
                                         <span className={notesFocus && notes && !validNotes ? 'block' : 'hidden'}>
-                                            La description du produit est invalide <br/>
+                                            La description de la sortie est invalide <br/>
                                             La description doit commencer par une lettre ou un chiffre <br />
                                             et ne peut contenir que des lettres, chiffres, espace et caractères "!@#$%^&.,;:'*+_-
                                         </span>
@@ -254,7 +271,8 @@ function RemoveProduct () {
                                             disabled={productId === "" || !validNotes || !validQuantity}
                                             className="w-[40vh] py-3 text-xl border rounded-lg bg-indigo-500 hover:cursor-pointer text-white font-semibold"
                                         >
-                                            Enrégistrer
+                                            {loading && <Loader2 className="w-6 h-6 animate-spin" />}
+                                            {loading ? 'Enregistrement...' : 'Enrégistrer'}
                                         </button>
                                     </div>
                                 </div>

@@ -1,9 +1,12 @@
 import { useState } from "react";
 import type { Product } from "../../api/productApi";
-import api from "../../api/axios";
 import { isAxiosError } from "axios";
 import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
+import axiosPrivate from "../../api/axiosPrivate";
+import { Loader2 } from "lucide-react";
+import Success from "./Success";
+
 
 interface EditProductFormProps {
     product: Product;
@@ -20,6 +23,7 @@ function EditProductForm({ product }: EditProductFormProps) {
 
     const [errMsg, setErrMsg] = useState("");
     const [success, setSuccess] = useState(false);
+    const [loading, setLoading] = useState(false); 
 
     const payload = {
         name,
@@ -39,9 +43,12 @@ function EditProductForm({ product }: EditProductFormProps) {
 
         e.preventDefault();
 
+        setLoading(true);
+        setErrMsg("");
+
         try {
 
-            await api.put(
+            await axiosPrivate.put(
                 `/products/${product.id}`,
                 payload,
                 {
@@ -50,6 +57,10 @@ function EditProductForm({ product }: EditProductFormProps) {
             );
 
             setSuccess(true);
+
+            setTimeout(() => {
+                navigate('/products')
+            }, 1500);
 
         } catch (error: unknown) {
 
@@ -69,10 +80,9 @@ function EditProductForm({ product }: EditProductFormProps) {
     if (success) {
 
         return (
-            <div>
-                <h1>Succès</h1>
-                <p>Le produit a bien été modifié.</p>
-            </div>
+
+            <Success action={"Produit mis à jour"} />
+
         );
     }
 
@@ -156,7 +166,8 @@ function EditProductForm({ product }: EditProductFormProps) {
                             <button type="submit"
                                 className="w-[45%] bg-indigo-500 text-white text-xl font-semibold py-2 rounded-lg cursor-pointer"
                             >
-                                Modifier
+                                {loading && <Loader2 className="w-6 h-6 animate-spin" />}
+                                {loading ? 'Enregistrement...' : 'Modifier'}
                             </button>
                         </div>
 

@@ -1,4 +1,5 @@
 import api from "./axios"
+import axiosPrivate from "./axiosPrivate"
 
 // define product interface
 export interface Product {
@@ -24,7 +25,7 @@ export type Status = "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK"
 
 export const fetchProducts = async () => {
 
-    const response = await api.get('/products/');
+    const response = await axiosPrivate.get('/products/');
     
     return response.data;
 }
@@ -36,4 +37,5 @@ export const fetchProductById = async (productId: number) => {
     const response = await api.get<Product>(`/products/${productId}`);
     console.log(response.data);
     return response.data;
+    
 }

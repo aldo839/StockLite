@@ -1,9 +1,11 @@
 import { useState } from "react";
 import type { Product } from "../../api/productApi";
-import api from "../../api/axios";
 import { isAxiosError } from "axios";
 import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
+import axiosPrivate from "../../api/axiosPrivate";
+import { Loader2 } from "lucide-react";
+import Success from "./Success";
 
 interface DeleteProductFormProps {
     product: Product;
@@ -17,13 +19,13 @@ function DeleteProductForm({ product }: DeleteProductFormProps) {
 
     const [errMsg, setErrMsg] = useState("");
     const [success, setSuccess] = useState(false);
-
+    const [loading, setLoading] = useState(false);
 
     const handleCancel = (e: React.MouseEvent<HTMLButtonElement>) => {
 
         e.preventDefault();
-        
         navigate('/products')
+
     }
 
 
@@ -31,9 +33,12 @@ function DeleteProductForm({ product }: DeleteProductFormProps) {
 
         e.preventDefault();
 
+        setLoading(true);
+        setErrMsg("");
+
         try {
 
-            await api.delete(
+            await axiosPrivate.delete(
                 `/products/${product.id}`,
                 {
                     headers: {'Content-Type': 'application/json'}
@@ -41,6 +46,10 @@ function DeleteProductForm({ product }: DeleteProductFormProps) {
             );
 
             setSuccess(true);
+            
+            setTimeout(() => {
+                navigate('/products');
+            })
 
         } catch (error: unknown) {
 
@@ -60,10 +69,8 @@ function DeleteProductForm({ product }: DeleteProductFormProps) {
     if (success) {
 
         return (
-            <div>
-                <h1>Succès</h1>
-                <p>Le produit a bien été supprimé.</p>
-            </div>
+            
+            <Success action={"Produit supprimé"} />
         );
     }
 
@@ -118,7 +125,8 @@ function DeleteProductForm({ product }: DeleteProductFormProps) {
                                 disabled={name !== product.name}
                                 className="w-[45%] bg-indigo-500 text-white text-xl font-semibold py-2 rounded-lg cursor-pointer"
                             >
-                                Modifier
+                                {loading && <Loader2 className="w-6 h-6 animate-spin" />}
+                                {loading ? 'Enregistrement...' : 'Supprimer'}
                             </button>
                         </div>
 

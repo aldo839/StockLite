@@ -3,6 +3,10 @@ import Navbar from "../UI/Navbar";
 import api from "../../api/axios";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axiosPrivate from "../../api/axiosPrivate";
+import { Loader2 } from 'lucide-react';
+import Success from "../UI/Success";
+
 
 const SUPPLIER_REGEX = /^[a-zA-Z][a-zA-Z0-9_+\-\s]{4,49}$/;
 const NOTES_REGEX = /^[a-zA-Z0-9][!@#$%^&.,;:'"*+_-\s]{0,200}$/;
@@ -33,6 +37,7 @@ function AddProduct () {
 
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const [productId, setProductId] = useState('');
 
@@ -45,8 +50,10 @@ function AddProduct () {
     const [quantityFocus, setQuantityFocus] = useState(false);
 
     const [supplier, setSupplier] = useState("");
-    const validSupplier = SUPPLIER_REGEX.test(supplier);
+    const validSupplier = supplier === "" || SUPPLIER_REGEX.test(supplier);
     const [supplierFocus, setSupplierFocus] = useState(false);
+
+    const [products, setProducts] = useState<Product[]>([]);
 
     useEffect(() => {
         supplierRef.current?.focus();
@@ -60,7 +67,6 @@ function AddProduct () {
         quantityRef.current?.focus();
     }, []);
 
-    const [products, setProducts] = useState<Product[]>([]);
 
     useEffect(() => {
 
@@ -75,18 +81,23 @@ function AddProduct () {
                 if (axios.isAxiosError(error)){
                     if (error.response?.status === 400){
                         setErrMsg('Bad Request')
+                        navigate('/400');
                     }
                     else if (error.response?.status === 401){
-                        setErrMsg('Unauthorized')
+                        setErrMsg('Unauthorized');
+                        navigate('/401');
                     }
                     else if (error.response?.status === 403){
-                        setErrMsg('Forbidden')
+                        setErrMsg('Forbidden');
+                        navigate('/401');
                     }
                     else if (error.response?.status === 404){
-                        setErrMsg('Categories Not Found')
+                        setErrMsg('Categories Not Found');
+                        navigate('/404');
                     }
                     else if (error.response?.status === 500){
-                        setErrMsg('Internal Server Error')
+                        setErrMsg('Internal Server Error');
+                        navigate('/500');
                     }
                 } else {
                     setErrMsg("Unknow Error");
@@ -95,12 +106,11 @@ function AddProduct () {
         }
 
         fetchProducts();
-    }, [])
+    }, [navigate])
 
 
     const handleCancel = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-
         navigate('/products');
     }
 
@@ -108,6 +118,14 @@ function AddProduct () {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         
         e.preventDefault();
+
+        if (!validQuantity || !validSupplier || !validNotes) {
+            setErrMsg("Please fix the invalid field.");
+            return;
+        }
+
+        setLoading(true);
+        setErrMsg("");
 
         const payload = {
             productId : Number(productId),
@@ -117,31 +135,43 @@ function AddProduct () {
         };
 
         try {
-            const response = await api.post(
+            const response = await axiosPrivate.post(
                 '/products/add',
                 JSON.stringify(payload),
                 {
-                    headers: {'Content-Type': 'application/json'}
+                    headers: {'Content-Type': 'application/json'},
+                    withCredentials: true
                 }
-            )
+            );
 
             setSuccess(true);
-            console.log(response.data);
+            setLoading(true);
+
+            setTimeout(() => {
+                navigate('/products');
+            }, 1500);
+
+            return response?.data;
 
         } catch (error) {
+
+            setLoading(false);
 
             if (axios.isAxiosError(error)) {
                 if (error.response?.status === 400){
                     setErrMsg('Bad request')
                 } 
                 else if (error.response?.status === 401){
-                    setErrMsg('Unauthorized')
+                    setErrMsg('Unauthorized');
+                    navigate('/401');
                 }
                 else if (error.response?.status === 403){
-                    setErrMsg('Forbidden')
+                    setErrMsg('Forbidden');
+                    navigate('/401');
                 }
                 else if (error.response?.status === 404){
-                    setErrMsg('Categories Not Found')
+                    setErrMsg('Categories Not Found');
+                    navigate('/404')
                 }
                 else if (error.response?.status === 500){
                     setErrMsg('Internal Server Error')
@@ -171,15 +201,18 @@ function AddProduct () {
                 <div>
 
                     {success ? (
-                        <div>
-                            <h1>Success</h1>
-                            <p>Now let's go</p>
-                        </div>
+
+                        <Success action={"La produit a été ajouté"} />
+
                     ) : (
                         
                         <div>
                             
-                            {errMsg ? (<span>{errMsg}</span>) : (
+                            {errMsg && (
+                                <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl font-medium">
+                                    {errMsg}
+                                </div>
+                            )}
 
                             <form onSubmit={handleSubmit} className="flex justify-between">
 
@@ -288,13 +321,13 @@ function AddProduct () {
                                             disabled={!validSupplier || !validNotes || !validQuantity}
                                             className="w-[40vh] py-3 text-xl border rounded-lg bg-indigo-500 hover:cursor-pointer text-white font-semibold"
                                         >
-                                            Enrégistrer
+                                            {loading && <Loader2 className="w-6 h-6 animate-spin" />}
+                                            {loading ? 'Enregistrement...' : 'Enrégistrer'}
                                         </button>
                                     </div>
                                 </div>
 
                             </form>
-                        )}
 
                         </div>
                     )}
